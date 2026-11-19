@@ -1,0 +1,165 @@
+{
+  "entities": {
+    "StoreProfile": {
+      "title": "StoreProfile",
+      "description": "Merchant store metadata and initialization state for an authenticated user.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the store owner."
+        },
+        "storeName": {
+          "type": "string",
+          "description": "Display name of the store (1 to 60 characters)."
+        },
+        "ownerEmail": {
+          "type": "string",
+          "description": "Optional email of the store owner."
+        },
+        "catalogSeeded": {
+          "type": "boolean",
+          "description": "Whether the starter catalog has already been initialized for this store."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the store profile was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the store profile was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": ["userId", "storeName", "catalogSeeded", "createdAt", "updatedAt"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "A product item in the merchant's catalog and inventory.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the product owner."
+        },
+        "name": {
+          "type": "string",
+          "description": "Product title (1 to 80 characters)."
+        },
+        "description": {
+          "type": "string",
+          "description": "Optional product description (up to 300 characters)."
+        },
+        "category": {
+          "type": "string",
+          "enum": ["ELECTRONICA", "HOGAR", "ACCESORIOS", "MODA", "BEBIDAS", "OTROS"],
+          "description": "Product category enum."
+        },
+        "priceCents": {
+          "type": "integer",
+          "description": "Unit price in cents (1 to 100000000)."
+        },
+        "stock": {
+          "type": "integer",
+          "description": "Available inventory units (0 to 100000)."
+        },
+        "sku": {
+          "type": "string",
+          "description": "Optional SKU code (up to 32 characters)."
+        },
+        "imageKey": {
+          "type": "string",
+          "description": "Optional bundled drawable key (e.g., headphones, coffee, backpack)."
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether the product is active and visible in the storefront."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the product was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the product was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": ["userId", "name", "category", "priceCents", "stock", "active", "createdAt", "updatedAt"]
+    },
+    "Sale": {
+      "title": "Sale",
+      "description": "A completed or cancelled point-of-sale transaction with line items.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the seller."
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Customer name or walk-in label (1 to 80 characters)."
+        },
+        "paymentMethod": {
+          "type": "string",
+          "enum": ["EFECTIVO", "TARJETA", "TRANSFERENCIA"],
+          "description": "Payment method used for the sale."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["COMPLETADA", "CANCELADA"],
+          "description": "Sale status; CANCELADA is terminal."
+        },
+        "items": {
+          "type": "array",
+          "description": "Bounded list of 1 to 30 sold line-item maps."
+        },
+        "totalCents": {
+          "type": "integer",
+          "description": "Total sale amount in cents (1 to 1000000000)."
+        },
+        "totalItems": {
+          "type": "integer",
+          "description": "Total unit count across all line items (1 to 10000)."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional order notes (up to 200 characters)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the sale was recorded (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the sale was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": ["userId", "customerName", "paymentMethod", "status", "items", "totalCents", "totalItems", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/StoreProfile"
+      },
+      "description": "User store profile and seeding state."
+    },
+    "/users/{userId}/products/{productId}": {
+      "schema": {
+        "$ref": "#/entities/Product"
+      },
+      "description": "Products belonging to the authenticated user's store."
+    },
+    "/users/{userId}/sales/{saleId}": {
+      "schema": {
+        "$ref": "#/entities/Sale"
+      },
+      "description": "Sales transactions recorded by the authenticated user."
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "MiTienda",
+  "description": "Aplicación de venta de productos con catálogo, carrito de compras, control de inventario y registro de ventas en la nube.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,81 @@
+<resources>
+    <string name="app_name">MiTienda</string>
+
+    <!-- Auth -->
+    <string name="auth_brand_subtitle">VENTA DE PRODUCTOS Y CONTROL DE INVENTARIO</string>
+    <string name="auth_headline">Tu tienda, ordenada y lista para vender</string>
+    <string name="auth_description">Administra tu catálogo, registra ventas al instante con carrito integrado y mantén tu inventario sincronizado en la nube.</string>
+    <string name="auth_feature_catalog">Catálogo visual con control de stock</string>
+    <string name="auth_feature_pos">Cobro rápido y comprobantes al instante</string>
+    <string name="auth_feature_analytics">Resumen diario de ingresos y métodos de pago</string>
+    <string name="auth_google_button">Continuar con Google</string>
+    <string name="auth_signing_in">Conectando cuenta…</string>
+    <string name="auth_hero_content_desc">Exhibidor artesanal de productos en MiTienda</string>
+
+    <!-- Navigation -->
+    <string name="nav_store">Tienda</string>
+    <string name="nav_inventory">Inventario</string>
+    <string name="nav_sales">Ventas</string>
+    <string name="action_sign_out">Cerrar sesión</string>
+
+    <!-- Storefront -->
+    <string name="search_products_hint">Buscar producto o SKU…</string>
+    <string name="filter_all">Todos</string>
+    <string name="hero_today_sales">Ventas de hoy</string>
+    <string name="hero_available_products">%1$d disponibles</string>
+    <string name="btn_add_to_cart">Agregar</string>
+    <string name="label_out_of_stock">Agotado</string>
+    <string name="label_low_stock">Últimas %1$d</string>
+    <string name="label_in_stock">Stock: %1$d</string>
+    <string name="cart_bar_summary">%1$d art. • Ver carrito</string>
+    <string name="empty_store_title">Sin productos que coincidan</string>
+    <string name="empty_store_subtitle">Ajusta tu búsqueda o agrega un nuevo producto desde Inventario.</string>
+
+    <!-- Cart & Checkout -->
+    <string name="cart_title">Carrito de venta</string>
+    <string name="cart_customer_label">Cliente</string>
+    <string name="cart_customer_default">Cliente Mostrador</string>
+    <string name="cart_payment_method">Método de pago</string>
+    <string name="cart_notes_label">Nota de venta (opcional)</string>
+    <string name="cart_total_label">Total a cobrar</string>
+    <string name="cart_confirm_sale">Confirmar venta</string>
+    <string name="cart_clear">Vaciar</string>
+    <string name="receipt_title">¡Venta registrada!</string>
+    <string name="receipt_close">Listo</string>
+
+    <!-- Inventory -->
+    <string name="inventory_new_product">Nuevo producto</string>
+    <string name="inventory_edit_product">Editar producto</string>
+    <string name="inventory_total_products">Productos</string>
+    <string name="inventory_low_stock">Stock bajo</string>
+    <string name="inventory_total_value">Valor inventario</string>
+    <string name="inventory_filter_all">Todos</string>
+    <string name="inventory_filter_active">Activos</string>
+    <string name="inventory_filter_low">Stock bajo</string>
+    <string name="inventory_filter_out">Agotados</string>
+    <string name="inventory_filter_paused">Pausados</string>
+    <string name="field_product_name">Nombre del producto</string>
+    <string name="field_product_desc">Descripción (opcional)</string>
+    <string name="field_product_price">Precio ($)</string>
+    <string name="field_product_stock">Stock disponible</string>
+    <string name="field_product_sku">SKU / Código (opcional)</string>
+    <string name="field_product_category">Categoría</string>
+    <string name="field_product_image">Imagen del producto</string>
+    <string name="field_product_active">Visible en tienda</string>
+    <string name="action_save">Guardar producto</string>
+    <string name="action_delete">Eliminar</string>
+    <string name="action_cancel">Cancelar</string>
+
+    <!-- Sales -->
+    <string name="sales_revenue_total">Ingresos netos</string>
+    <string name="sales_completed_count">Ventas válidas</string>
+    <string name="sales_avg_ticket">Ticket promedio</string>
+    <string name="sales_units_sold">Unidades vendidas</string>
+    <string name="sales_payment_breakdown">Distribución por método de pago</string>
+    <string name="sales_history_title">Historial de ventas</string>
+    <string name="sales_empty_title">Aún no hay ventas</string>
+    <string name="sales_empty_subtitle">Agrega productos al carrito en la pestaña Tienda para registrar tu primera venta.</string>
+    <string name="sale_cancel_action">Cancelar venta y devolver stock</string>
+    <string name="sale_cancel_confirm_title">¿Cancelar esta venta?</string>
+    <string name="sale_cancel_confirm_body">La venta quedará marcada como cancelada y se devolverán las unidades al inventario disponible.</string>
+</resources>

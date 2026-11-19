@@ -1,0 +1,155 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidStoreProfile(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.storeName is string && data.storeName.size() >= 1 && data.storeName.size() <= 60 &&
+             (!('ownerEmail' in data) || (data.ownerEmail is string && data.ownerEmail.size() <= 120)) &&
+             data.catalogSeeded is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidCategory(cat) {
+      return cat in ['ELECTRONICA', 'HOGAR', 'ACCESORIOS', 'MODA', 'BEBIDAS', 'OTROS'];
+    }
+
+    function isValidProduct(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.name is string && data.name.size() >= 1 && data.name.size() <= 80 &&
+             (!('description' in data) || (data.description is string && data.description.size() <= 300)) &&
+             data.category is string && isValidCategory(data.category) &&
+             data.priceCents is int && data.priceCents >= 1 && data.priceCents <= 100000000 &&
+             data.stock is int && data.stock >= 0 && data.stock <= 100000 &&
+             (!('sku' in data) || (data.sku is string && data.sku.size() <= 32)) &&
+             (!('imageKey' in data) || (data.imageKey is string && data.imageKey.size() <= 64)) &&
+             data.active is bool &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    function isValidSaleItem(item) {
+      return item is map &&
+             item.keys().hasAll(['productId', 'productName', 'quantity', 'unitPriceCents', 'subtotalCents']) &&
+             item.keys().hasOnly(['productId', 'productName', 'quantity', 'unitPriceCents', 'subtotalCents']) &&
+             item.productId is string && isValidId(item.productId) &&
+             item.productName is string && item.productName.size() >= 1 && item.productName.size() <= 80 &&
+             item.quantity is int && item.quantity >= 1 && item.quantity <= 10000 &&
+             item.unitPriceCents is int && item.unitPriceCents >= 1 && item.unitPriceCents <= 100000000 &&
+             item.subtotalCents is int && item.subtotalCents >= 1 && item.subtotalCents <= 1000000000;
+    }
+
+    function isValidSale(data, userId) {
+      return data.userId is string && data.userId == userId &&
+             data.customerName is string && data.customerName.size() >= 1 && data.customerName.size() <= 80 &&
+             data.paymentMethod in ['EFECTIVO', 'TARJETA', 'TRANSFERENCIA'] &&
+             data.status in ['COMPLETADA', 'CANCELADA'] &&
+             data.items is list && data.items.size() >= 1 && data.items.size() <= 30 &&
+             isValidSaleItem(data.items[0]) &&
+             data.totalCents is int && data.totalCents >= 1 && data.totalCents <= 1000000000 &&
+             data.totalItems is int && data.totalItems >= 1 && data.totalItems <= 10000 &&
+             (!('notes' in data) || (data.notes is string && data.notes.size() <= 200)) &&
+             data.createdAt is timestamp && data.createdAt <= request.time &&
+             data.updatedAt is timestamp && data.updatedAt <= request.time;
+    }
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow list: if false;
+
+      allow create: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       incoming().keys().hasAll(['userId', 'storeName', 'catalogSeeded', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'storeName', 'ownerEmail', 'catalogSeeded', 'createdAt', 'updatedAt']) &&
+                       isValidStoreProfile(incoming(), userId);
+
+      allow update: if isOwner(userId) &&
+                       isValidId(userId) &&
+                       isValidStoreProfile(incoming(), userId) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       (
+                         incoming().diff(existing()).affectedKeys().hasOnly(['storeName', 'updatedAt']) ||
+                         incoming().diff(existing()).affectedKeys().hasOnly(['catalogSeeded', 'updatedAt'])
+                       );
+
+      allow delete: if false;
+
+      match /products/{productId} {
+        allow get: if isOwner(userId) && isValidId(productId);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(productId) &&
+                         incoming().keys().hasAll(['userId', 'name', 'category', 'priceCents', 'stock', 'active', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'name', 'description', 'category', 'priceCents', 'stock', 'sku', 'imageKey', 'active', 'createdAt', 'updatedAt']) &&
+                         isValidProduct(incoming(), userId);
+
+        allow update: if isOwner(userId) &&
+                         isValidId(productId) &&
+                         isValidProduct(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         (
+                           // Action: Adjust stock (inventory +/- or checkout/cancel batch)
+                           incoming().diff(existing()).affectedKeys().hasOnly(['stock', 'updatedAt']) ||
+                           // Action: Toggle storefront visibility
+                           incoming().diff(existing()).affectedKeys().hasOnly(['active', 'updatedAt']) ||
+                           // Action: Full product details edit
+                           incoming().diff(existing()).affectedKeys().hasOnly(['name', 'description', 'category', 'priceCents', 'stock', 'sku', 'imageKey', 'active', 'updatedAt'])
+                         );
+
+        allow delete: if isOwner(userId) && isValidId(productId);
+      }
+
+      match /sales/{saleId} {
+        allow get: if isOwner(userId) && isValidId(saleId);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId) &&
+                         isValidId(saleId) &&
+                         incoming().keys().hasAll(['userId', 'customerName', 'paymentMethod', 'status', 'items', 'totalCents', 'totalItems', 'createdAt', 'updatedAt']) &&
+                         incoming().keys().hasOnly(['userId', 'customerName', 'paymentMethod', 'status', 'items', 'totalCents', 'totalItems', 'notes', 'createdAt', 'updatedAt']) &&
+                         incoming().status == 'COMPLETADA' &&
+                         isValidSale(incoming(), userId);
+
+        // Terminal state locking: only COMPLETADA -> CANCELADA transition is permitted
+        allow update: if isOwner(userId) &&
+                         isValidId(saleId) &&
+                         isValidSale(incoming(), userId) &&
+                         incoming().userId == existing().userId &&
+                         incoming().createdAt == existing().createdAt &&
+                         existing().status == 'COMPLETADA' &&
+                         incoming().status == 'CANCELADA' &&
+                         incoming().diff(existing()).affectedKeys().hasOnly(['status', 'updatedAt']);
+
+        allow delete: if false;
+      }
+    }
+  }
+}
